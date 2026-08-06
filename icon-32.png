@@ -1,0 +1,1420 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ensayo — gimnasia mental</title>
+
+<!-- PWA / iOS home screen -->
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1B2620">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Ensayo">
+<link rel="apple-touch-icon" href="/icons/icon-180.png">
+<link rel="icon" href="/icons/icon-32.png">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1B2620;
+    --ink-soft:#243731;
+    --ink-line: rgba(255,255,255,0.06);
+    --paper:#F3EFE3;
+    --paper-shadow:#00000055;
+    --paper-line: rgba(43,43,46,0.08);
+    --graphite:#2B2B2E;
+    --graphite-soft:#6b6a63;
+    --correct:#2F8F5B;
+    --incorrect:#C1443B;
+    --accent:#3E7CB8;
+    --font-display:'Space Grotesk', sans-serif;
+    --font-body:'Source Serif 4', Georgia, serif;
+    --font-mono:'JetBrains Mono', monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 20% -10%, #2c4038 0%, transparent 55%),
+      radial-gradient(ellipse at 100% 110%, #16211c 0%, transparent 60%),
+      var(--ink);
+    background-attachment:fixed;
+    font-family:var(--font-body);
+    color:var(--paper);
+    display:flex;
+    justify-content:center;
+    position:relative;
+    overflow-x:hidden;
+  }
+  body::before{
+    content:"";
+    position:fixed; inset:0;
+    background-image: radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1.4px);
+    background-size: 26px 26px;
+    pointer-events:none;
+    opacity:0.5;
+  }
+  #app{
+    width:100%;
+    max-width:760px;
+    padding:calc(28px + env(safe-area-inset-top)) 20px calc(70px + env(safe-area-inset-bottom));
+    position:relative;
+    z-index:1;
+  }
+  header{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    margin-bottom:28px;
+    gap:12px;
+  }
+  .brand{ display:flex; flex-direction:column; gap:2px; }
+  .brand h1{
+    font-family:var(--font-display);
+    font-weight:700;
+    font-size:26px;
+    letter-spacing:0.5px;
+    margin:0;
+    color:var(--paper);
+  }
+  .brand h1 span{ color:var(--accent-live, #C98A3B); transition:color .3s; }
+  .brand p{
+    margin:0; font-family:var(--font-mono); font-size:11px;
+    letter-spacing:1.5px; text-transform:uppercase; color:#9fb0a6;
+  }
+  .stats{
+    display:flex; gap:14px; align-items:center;
+    font-family:var(--font-mono); font-size:12px; color:#c9d3cb;
+  }
+  .stat{
+    display:flex; flex-direction:column; align-items:flex-end; line-height:1.3;
+  }
+  .stat b{ font-size:16px; color:var(--paper); font-weight:600; }
+  .stat small{ letter-spacing:1px; opacity:0.65; text-transform:uppercase; font-size:9px; }
+  .home-link{
+    background:none; border:1px solid var(--ink-line); color:#c9d3cb;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px;
+    padding:6px 10px; border-radius:5px; cursor:pointer;
+    display:none;
+  }
+  .home-link:hover{ border-color:#8aa89a; color:#fff; }
+
+  /* ---------- HOME ---------- */
+  #screen-home .intro{ margin-bottom:26px; }
+  #screen-home .intro p{
+    font-size:15px; color:#c9d3cb; margin:0; max-width:46ch; line-height:1.55;
+  }
+  .cards{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:14px;
+  }
+  @media (max-width:620px){ .cards{ grid-template-columns:1fr; } }
+  .mode-card{
+    --c: #3E7CB8;
+    background: linear-gradient(155deg, var(--ink-soft), #1c2b25);
+    border:1px solid var(--ink-line);
+    border-radius:10px;
+    padding:20px 16px 18px;
+    cursor:pointer;
+    text-align:left;
+    position:relative;
+    overflow:hidden;
+    transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+    font-family:inherit;
+    color:inherit;
+  }
+  .mode-card:hover{
+    transform:translateY(-3px);
+    border-color: var(--c);
+    box-shadow:0 10px 24px -12px var(--c);
+  }
+  .mode-card::before{
+    content:"";
+    position:absolute; top:0; left:0; right:0; height:3px;
+    background:var(--c);
+  }
+  .mode-icon{
+    width:34px; height:34px; margin-bottom:14px;
+    color:var(--c);
+  }
+  .mode-card h3{
+    font-family:var(--font-display); font-size:16px; margin:0 0 6px;
+    letter-spacing:0.3px; color:var(--paper);
+  }
+  .mode-card p{
+    font-size:12.5px; color:#a9b6ae; margin:0 0 14px; line-height:1.5; min-height:36px;
+  }
+  .mode-card .go{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:1px;
+    color:var(--c); text-transform:uppercase; display:flex; align-items:center; gap:5px;
+  }
+
+  /* ---------- QUESTION CARD ---------- */
+  #screen-question{ display:none; }
+  .paper-card{
+    background:
+      repeating-linear-gradient(var(--paper), var(--paper) 33px, var(--paper-line) 34px),
+      var(--paper);
+    color:var(--graphite);
+    border-radius:6px;
+    padding:26px 26px 24px;
+    box-shadow:0 24px 50px -20px var(--paper-shadow), 0 2px 0 rgba(255,255,255,0.4) inset;
+    position:relative;
+    transform:rotate(-0.35deg);
+  }
+  .paper-card::after{
+    content:""; position:absolute; left:44px; top:0; bottom:0; width:1px;
+    background: rgba(193,68,59,0.18);
+  }
+  .q-meta{
+    display:flex; justify-content:space-between; align-items:baseline;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.5px;
+    text-transform:uppercase; color:var(--accent-live,#3E7CB8); margin-bottom:14px;
+    padding-left:22px;
+  }
+  .q-meta .num{ color:var(--graphite-soft); text-transform:none; letter-spacing:0; }
+  .q-enunciado{
+    font-size:17px; line-height:1.6; margin:0 0 6px; padding-left:22px;
+    min-height:26px;
+  }
+  .q-figure{ margin:14px 0 16px 22px; }
+  .q-figure svg{ max-width:100%; height:auto; display:block; }
+  .q-options{ list-style:none; margin:18px 0 0; padding-left:22px; display:flex; flex-direction:column; gap:11px; }
+  .q-option{
+    display:flex; align-items:center; gap:12px; cursor:pointer;
+    padding:6px 8px 6px 2px; border-radius:6px; transition:background .15s;
+  }
+  .q-option:hover{ background:rgba(43,43,46,0.05); }
+  .q-option.locked{ cursor:default; }
+  .bubble{
+    width:26px; height:26px; min-width:26px; border-radius:50%;
+    border:1.6px solid var(--graphite);
+    display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-mono); font-size:12px; font-weight:700;
+    position:relative; transform:rotate(var(--tilt,0deg));
+    transition:border-color .2s;
+  }
+  .q-option:nth-child(1) .bubble{ --tilt:-2deg; }
+  .q-option:nth-child(2) .bubble{ --tilt:1.5deg; }
+  .q-option:nth-child(3) .bubble{ --tilt:-1deg; }
+  .q-option:nth-child(4) .bubble{ --tilt:2deg; }
+  .q-option:nth-child(5) .bubble{ --tilt:-1.5deg; }
+  .bubble .fill{
+    width:13px; height:13px; border-radius:50%; background:var(--graphite);
+    transform:scale(0); transition:transform .28s cubic-bezier(.5,1.6,.4,1);
+  }
+  .q-option.selected .bubble .fill{ transform:scale(1); }
+  .q-option-text{ font-size:14.5px; line-height:1.45; }
+  .q-option.correct-answer .bubble{ border-color:var(--correct); }
+  .q-option.wrong-answer .bubble{ border-color:var(--incorrect); }
+  .mark-icon{ position:absolute; inset:-7px; overflow:visible; }
+  .mark-icon path{
+    fill:none; stroke-width:2.6; stroke-linecap:round; stroke-linejoin:round;
+    stroke-dasharray:40; stroke-dashoffset:40;
+    animation:draw .35s ease forwards;
+  }
+  @keyframes draw{ to{ stroke-dashoffset:0; } }
+
+  .actions{ padding-left:22px; margin-top:22px; display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .btn{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.5px;
+    padding:11px 18px; border-radius:6px; border:none; cursor:pointer;
+    background:var(--graphite); color:var(--paper); font-weight:500;
+    transition:opacity .15s, transform .1s;
+  }
+  .btn:disabled{ opacity:0.35; cursor:not-allowed; }
+  .btn:not(:disabled):hover{ opacity:0.88; }
+  .btn:not(:disabled):active{ transform:scale(0.97); }
+  .btn.ghost{
+    background:none; border:1.4px solid var(--graphite); color:var(--graphite);
+  }
+  .feedback-line{
+    font-family:var(--font-mono); font-size:12px; letter-spacing:0.3px;
+  }
+  .feedback-line.ok{ color:var(--correct); }
+  .feedback-line.bad{ color:var(--incorrect); }
+
+  .hint-box{
+    margin:12px 0 0 22px; padding:10px 12px; border-radius:5px; max-width:92%;
+    background:rgba(62,124,184,0.08); border:1px dashed var(--accent-live,#3E7CB8);
+    font-family:var(--font-mono); font-size:12.5px; line-height:1.5; color:var(--graphite);
+  }
+
+  .reveal{
+    max-height:0; overflow:hidden; opacity:0;
+    transition:max-height .4s ease, opacity .4s ease, margin .4s ease;
+    padding-left:22px;
+  }
+  .reveal.open{ max-height:900px; opacity:1; margin-top:18px; }
+  .reveal-block{
+    border-top:1px dashed var(--paper-line); padding-top:14px;
+  }
+  .reveal-block h4{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:1.2px;
+    text-transform:uppercase; color:var(--graphite-soft); margin:0 0 8px;
+  }
+  .reveal-block p{ margin:0; font-size:14.5px; line-height:1.6; }
+  .funfact{
+    margin-top:14px; background:#fff8de; border:1px solid #e8dca6;
+    padding:12px 14px; border-radius:4px; transform:rotate(0.6deg);
+    box-shadow:0 6px 14px -8px rgba(0,0,0,0.35);
+    font-size:13px; line-height:1.55; position:relative;
+  }
+  .funfact::before{
+    content:"dato freak"; position:absolute; top:-9px; left:12px;
+    font-family:var(--font-mono); font-size:9px; letter-spacing:1px;
+    background:#f1e6a8; padding:1px 7px; border-radius:3px; color:#7a6524;
+    text-transform:uppercase;
+  }
+
+  .next-row{ padding-left:22px; margin-top:20px; }
+
+  .loading-wrap{
+    padding-left:22px; display:flex; flex-direction:column; gap:10px; min-height:140px; justify-content:center;
+  }
+  .loading-wrap .spinner{
+    width:16px; height:16px; border-radius:50%;
+    border:2px solid var(--paper-line); border-top-color:var(--graphite);
+    animation:spin .7s linear infinite;
+  }
+  .loading-row{ display:flex; align-items:center; gap:10px; font-family:var(--font-mono); font-size:12px; color:var(--graphite-soft); }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  .error-box{
+    padding-left:22px; font-family:var(--font-mono); font-size:12px; color:var(--incorrect);
+  }
+
+  footer.note{
+    margin-top:30px; text-align:center; font-family:var(--font-mono);
+    font-size:10.5px; letter-spacing:0.5px; color:#7c8b81;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{ animation-duration:0.001s !important; transition-duration:0.001s !important; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <header>
+    <div class="brand">
+      <h1>Ensayo<span id="brand-dot">.</span></h1>
+      <p>gimnasia mental · cero scroll</p>
+    </div>
+    <div style="display:flex; align-items:center; gap:14px;">
+      <button class="home-link" id="btn-home">← inicio</button>
+      <div class="stats">
+        <div class="stat"><b id="stat-streak">0</b><small>racha días</small></div>
+        <div class="stat"><b id="stat-score">0/0</b><small>esta sesión</small></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="screen-home">
+    <div class="intro">
+      <p>Elige una modalidad. Preguntas cortas, para resolver pensando — no calculando en hoja. Cada una trae su desarrollo explicado y, de vez en cuando, un dato freak.</p>
+    </div>
+    <div class="cards">
+      <button class="mode-card" data-mode="calculo" style="--c:#3E7CB8">
+        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 2l9 20H3L12 2z"/><path d="M8 15h8"/><circle cx="12" cy="9" r="1.2" fill="currentColor" stroke="none"/></svg>
+        <h3>Cálculo</h3>
+        <p>Geometría, ángulos, teoremas y razonamiento numérico, estilo PAES.</p>
+        <span class="go">entrar →</span>
+      </button>
+      <button class="mode-card" data-mode="historia" style="--c:#A9702C">
+        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><path d="M9 7h7M9 11h5"/></svg>
+        <h3>Historia</h3>
+        <p>Deporte, literatura, política, arte y ciencia — para razonar y aprender algo.</p>
+        <span class="go">entrar →</span>
+      </button>
+      <button class="mode-card" data-mode="economia" style="--c:#2F8F5B">
+        <svg class="mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M3 17l5-6 4 3 6-8"/><path d="M14 6h4v4"/><path d="M3 21h18"/></svg>
+        <h3>Economía</h3>
+        <p>EBITDA, IPoM, tasas, mercado — conceptos explicados simple.</p>
+        <span class="go">entrar →</span>
+      </button>
+    </div>
+  </section>
+
+  <section id="screen-question">
+    <div class="paper-card" id="card"></div>
+  </section>
+
+  <footer class="note">preguntas generadas al vuelo · no se repiten en la sesión</footer>
+</div>
+
+<script>
+(function(){
+  const MODE_META = {
+    calculo:  { label:'Cálculo · geometría', accent:'#3E7CB8' },
+    historia: { label:'Historia', accent:'#A9702C' },
+    economia: { label:'Economía', accent:'#2F8F5B' }
+  };
+
+  const MODE_SYSTEM = {
+    calculo: `Eres un profesor chileno que redacta preguntas de entrenamiento mental de matemática, nivel escolar/PAES, resolubles pensando, sin lápiz ni calculadora.
+Reglas del enunciado: debe poder resolverse mentalmente en menos de 40 segundos, con números simples y como máximo dos o tres pasos de razonamiento.
+Varía el tema entre preguntas — no repitas siempre geometría. Elige UNO de estos cuatro bloques por pregunta, rotando entre ellos:
+(a) Geometría: teorema de Thales, ángulos entre paralelas, teorema de Pitágoras (ternas simples), áreas y perímetros de figuras básicas, propiedades de polígonos.
+(b) Funciones: evaluar una función simple en un punto (ej. lineal, cuadrática o afín con coeficientes chicos), leer o deducir dominio/recorrido básico, componer dos funciones simples, interpretar la pendiente o el intercepto de una función lineal.
+(c) Derivadas fáciles: regla de la potencia con exponentes chicos (d/dx de x^n, polinomios de 2-3 términos), derivada de una constante, evaluar la derivada en un punto simple, relacionar la derivada con la pendiente de la recta tangente. Mantén los coeficientes y exponentes pequeños (enteros de un dígito) para que se resuelva de cabeza.
+(d) Razonamiento algebraico o numérico simple: ecuaciones de un paso, proporciones, porcentajes simples, sucesiones numéricas cortas.
+Apoyo visual — dos mecanismos distintos, nunca los combines en la misma pregunta:
+• "figura_svg" es SOLO para geometría (bloque a) y SOLO cuando el problema involucra UNA sola figura geométrica (un triángulo, un ángulo entre paralelas, un polígono). Si el problema compara DOS figuras separadas (por ejemplo triángulos semejantes ABC y DEF), déjalo en "" — con dos figuras separadas es fácil rotular mal un lado. Cuando sí dibujes, primero completa "verificacion" identificando, letra por letra, qué segmento o ángulo corresponde a cada dato y cuál es la incógnita — recién después dibuja el SVG siguiendo exactamente esa verificación. El SVG debe ser plano, viewBox="0 0 280 170", solo con <line>,<polygon>,<circle>,<path>,<text>, stroke="#2B2B2E" stroke-width="1.6" fill="none" (excepto <text> que usa fill="#2B2B2E" font-size="12"). Reglas: (1) cada vértice lleva EXACTAMENTE la misma letra que el enunciado; (2) escribe el valor numérico de cada medida DADA pegado al segmento correcto según tu "verificacion"; (3) el segmento o ángulo preguntado va sin número o con "?"; (4) proporciones coherentes con los datos reales. Sin scripts ni estilos externos.
+• "grafica_datos" es SOLO para funciones o derivadas (bloques b y c) cuando la función es un polinomio de grado 3 o menos con coeficientes simples (números de un dígito, pueden ser negativos o decimales .5). NO escribas SVG a mano para esto — entrega solo los datos numéricos y el cliente dibuja el gráfico exacto. Formato: {"coeficientes":[...] (del término de mayor grado al de grado 0; ej. x²−2x+1 es [1,-2,1]; una recta 3x−2 es [3,-2]), "rango_x":[xmin,xmax] (que incluya la zona relevante, ej. [-1,5]), "punto_x": número si el enunciado marca un punto o evaluación específica, o null si no aplica, "mostrar_tangente": true SOLO si el enunciado pide o involucra la pendiente/recta tangente en ese punto, si no false}. En "verificacion" confirma que esos coeficientes y ese punto coinciden exactamente con el enunciado. Si el problema es puramente algebraico/simbólico sin función graficable (ej. una ecuación de un paso, un porcentaje), deja "grafica_datos": null.
+Da exactamente 5 alternativas plausibles (una correcta, cuatro distractores creíbles basados en errores típicos — por ejemplo, para derivadas: olvidar bajar el exponente, o restar 1 al exponente mal).
+"pista": una frase corta que recuerde la fórmula o regla necesaria (ej. "Fórmula: Área = base × altura / 2"), sin insinuar el número de la respuesta.
+"desarrollo": explica el razonamiento paso a paso y nombra el teorema, regla o propiedad usada, en 2-4 frases, tono directo.
+"dato_curioso": inclúyelo en aproximadamente la mitad de las preguntas — una anécdota real breve sobre el teorema, el matemático, la regla, o el concepto. Si no aplica, usa "".
+Responde SIEMPRE solo con un objeto JSON válido, sin texto antes ni después, sin bloques de markdown.`,
+    historia: `Eres un editor chileno que redacta preguntas de cultura general de historia para un app de entrenamiento mental — temas: deporte, literatura, política, arte, ciencia, historia universal y de Chile.
+La pregunta debe invitar a razonar o deducir con las pistas del enunciado, no solo memorizar una fecha suelta. Debe leerse y responderse en menos de 30 segundos.
+Da 4 o 5 alternativas plausibles.
+"pista": una frase corta que dé una señal indirecta (una época, un lugar, una relación) sin decir la respuesta.
+"desarrollo": 2-4 frases de contexto que expliquen por qué es la respuesta correcta y qué hay detrás.
+"dato_curioso": inclúyelo en la mayoría de las preguntas — una anécdota real breve y poco conocida relacionada al tema. Si no aplica, usa "".
+"figura_svg" siempre "" (no aplica en este modo).
+Responde SIEMPRE solo con un objeto JSON válido, sin texto antes ni después, sin bloques de markdown.`,
+    economia: `Eres un editor chileno que redacta preguntas conceptuales de economía y finanzas para un app de entrenamiento mental — nivel introductorio/intermedio: EBITDA, IPoM, TPM del Banco Central, IPC, inflación, PIB, tasas de interés, mercado de capitales, UF, oferta y demanda, indicadores bursátiles, términos de real estate/finanzas corporativas.
+La pregunta debe evaluar comprensión del concepto, idealmente con un mini-caso o número simple, resoluble razonando en menos de 30 segundos.
+Tienes acceso a una herramienta de búsqueda web. Rota entre estos tres tipos de pregunta en proporciones parecidas:
+(1) Conceptual pura, sin buscar — un concepto o cálculo simple, atemporal.
+(2) Dato de mercado en vivo: busca primero UN dato real y actual de la economía chilena (valor de la UF hoy, tipo de cambio dólar/peso, último IPC mensual publicado, TPM vigente del Banco Central, nivel del IPSA) y úsalo en el enunciado o en las alternativas, dejando claro que es un valor actual/reciente (sin necesidad de dar la fecha exacta de tu búsqueda).
+(3) Actualidad económica: busca una noticia económica o financiera chilena reciente (últimas semanas), priorizando el Diario Financiero (df.cl) y La Tercera (Pulso/Negocios); si no encuentras algo relevante ahí, usa otro medio económico chileno serio (Emol Economía, El Mercurio Inversiones, BioBioChile Economía). Arma una pregunta sobre ese hecho (qué empresa, qué cifra, qué decisión, qué indicador) redactada COMPLETAMENTE con tus propias palabras — nunca copies titulares ni frases del artículo, resume el hecho de forma original. Evita temas político-partidistas; enfócate en lo estrictamente económico o de negocios (resultados de empresas, fusiones, IPOs, cifras macro, decisiones del Banco Central o de mercado).
+Usa como máximo una búsqueda breve por pregunta. Si la búsqueda falla o no encuentra nada útil, arma la pregunta igual de forma conceptual (tipo 1) — nunca inventes una cifra o un hecho como si fuera real.
+Da 4 o 5 alternativas plausibles.
+"pista": una frase corta que recuerde el concepto clave a aplicar, sin decir la respuesta.
+"desarrollo": explica el concepto o el hecho de forma simple y directa, en 2-4 frases. Si viene de una noticia, puedes mencionar de forma genérica el medio (ej. "según informó recientemente el Diario Financiero...") pero sin citar ninguna frase textual del artículo.
+"dato_curioso": inclúyelo cuando exista un dato real interesante (origen del término, anécdota de mercado, cifra llamativa). Si no aplica, usa "".
+"figura_svg" siempre "" (no aplica en este modo).
+Importante: cuando termines de razonar y buscar, tu ÚNICA respuesta visible debe ser el objeto JSON — nada de comentarios antes ni después, ni siquiera algo como "aquí está la pregunta".
+Responde SIEMPRE solo con un objeto JSON válido, sin texto antes ni después, sin bloques de markdown.`
+  };
+
+  const SCHEMA_HINT = `Formato JSON exacto (sin nada más alrededor), completa los campos EN ESTE ORDEN:
+{
+  "verificacion": "string breve (1-2 frases): si hay figura o gráfico, confirma qué corresponde a cada dato entregado y cuál es la incógnita que se pregunta. Si no hay ninguno, deja ''.",
+  "tema": "string corto, 2-5 palabras identificando el tema puntual",
+  "enunciado": "string, el enunciado completo de la pregunta",
+  "figura_svg": "string con el SVG (coherente con 'verificacion') o vacío — solo para geometría de una sola figura",
+  "grafica_datos": {"coeficientes":[1,-2,1],"rango_x":[-1,5],"punto_x":3,"mostrar_tangente":true} o null — solo para funciones/derivadas graficables, ver instrucciones,
+  "opciones": ["string", "string", "string", "string", "string opcional"],
+  "respuesta_correcta": 0,
+  "pista": "string CORTA (una frase) que recuerde la fórmula, regla o idea clave a usar — sin dar el resultado ni acercarse a él",
+  "desarrollo": "string con la explicación paso a paso",
+  "dato_curioso": "string o vacío"
+}`;
+
+  const LOADING_MSGS = {
+    calculo: ['Afilando el compás…', 'Trazando la figura…', 'Revisando el teorema…'],
+    historia: ['Hojeando el archivo…', 'Buscando la fuente…', 'Confirmando la fecha…'],
+    economia: ['Revisando el IPoM…', 'Cuadrando la planilla…', 'Chequeando la tasa…']
+  };
+
+  // ---- Fallback local (si falla la API o tarda) — banco amplio para evitar repetición ----
+  const FALLBACK = {
+    calculo: [
+      {
+        tema:'Teorema de Thales', enunciado:'En un triángulo ABC, una recta paralela a BC corta a AB en D y a AC en E. Si AD = 4, DB = 2 y AE = 6, ¿cuánto mide EC?',
+        figura_svg:'<svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg"><polygon points="140,20 30,150 250,150" stroke="#2B2B2E" stroke-width="1.6" fill="none"/><line x1="67" y1="107" x2="213" y2="107" stroke="#2B2B2E" stroke-width="1.6"/><text x="134" y="14" font-size="12" fill="#2B2B2E">A</text><text x="14" y="164" font-size="12" fill="#2B2B2E">B</text><text x="246" y="164" font-size="12" fill="#2B2B2E">C</text><text x="48" y="102" font-size="12" fill="#2B2B2E">D</text><text x="218" y="102" font-size="12" fill="#2B2B2E">E</text><text x="93" y="60" font-size="11" fill="#2B2B2E">4</text><text x="42" y="132" font-size="11" fill="#2B2B2E">2</text><text x="168" y="60" font-size="11" fill="#2B2B2E">6</text><text x="222" y="132" font-size="11" fill="#2B2B2E">?</text></svg>',
+        opciones:['2','3','4','6'], respuesta_correcta:1,
+        pista:'Fórmula: AD/DB = AE/EC (segmentos proporcionales).',
+        desarrollo:'Por Thales, AD/DB = AE/EC. Entonces 4/2 = 6/EC, de donde EC = 6·2/4 = 3.',
+        dato_curioso:'Se cuenta que Thales de Mileto midió la altura de la Gran Pirámide comparando la sombra de su bastón con la sombra de la pirámide, sin tocarla — el mismo principio de proporciones.'
+      },
+      {
+        tema:'Teorema de Pitágoras', enunciado:'Un triángulo rectángulo tiene sus catetos de 6 cm y 8 cm. ¿Cuánto mide la hipotenusa?',
+        figura_svg:'<svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg"><polygon points="40,150 40,40 230,150" stroke="#2B2B2E" stroke-width="1.6" fill="none"/><rect x="40" y="138" width="12" height="12" stroke="#2B2B2E" stroke-width="1.2" fill="none"/><text x="18" y="98" font-size="12" fill="#2B2B2E">8</text><text x="130" y="164" font-size="12" fill="#2B2B2E">6</text><text x="120" y="88" font-size="12" fill="#2B2B2E">?</text></svg>',
+        opciones:['9','10','12','14'], respuesta_correcta:1,
+        pista:'Fórmula: hipotenusa² = cateto₁² + cateto₂².',
+        desarrollo:'Por el teorema de Pitágoras, hipotenusa² = 6² + 8² = 36 + 64 = 100, así que la hipotenusa mide 10 cm — es la clásica terna 6-8-10, múltiplo de la terna 3-4-5.',
+        dato_curioso:'Las ternas pitagóricas se usaban mucho antes de Pitágoras: hay tablillas babilónicas de hace más de 3.500 años con listas de estas ternas, usadas por agrimensores para trazar ángulos rectos con una cuerda anudada.'
+      },
+      {
+        tema:'Ángulos entre paralelas', enunciado:'Dos rectas paralelas L1 y L2 son cortadas por una transversal. Uno de los ángulos formados mide 65°. ¿Cuánto mide el ángulo colateral interno (mismo lado de la transversal, entre las paralelas)?',
+        figura_svg:'<svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg"><line x1="20" y1="50" x2="260" y2="50" stroke="#2B2B2E" stroke-width="1.6"/><line x1="20" y1="140" x2="260" y2="140" stroke="#2B2B2E" stroke-width="1.6"/><line x1="70" y1="10" x2="210" y2="170" stroke="#2B2B2E" stroke-width="1.6"/><text x="6" y="46" font-size="11" fill="#2B2B2E">L1</text><text x="6" y="136" font-size="11" fill="#2B2B2E">L2</text><text x="128" y="42" font-size="12" fill="#2B2B2E">65°</text><text x="150" y="128" font-size="12" fill="#2B2B2E">?</text></svg>',
+        opciones:['65°','115°','90°','180°'], respuesta_correcta:1,
+        pista:'Los ángulos colaterales internos son suplementarios: suman 180°.',
+        desarrollo:'Los ángulos colaterales internos (mismo lado de la transversal, entre las paralelas) son suplementarios: suman 180°. Entonces el otro ángulo mide 180° − 65° = 115°.',
+        dato_curioso:''
+      },
+      {
+        tema:'Semejanza — sombras', enunciado:'Un poste de 3 m de altura proyecta una sombra de 2 m. En el mismo instante, un árbol cercano proyecta una sombra de 8 m. ¿Cuántos metros mide el árbol?',
+        figura_svg:'', opciones:['9','10','12','16'], respuesta_correcta:2,
+        pista:'Plantea una proporción: altura/sombra es igual en ambos objetos.',
+        desarrollo:'Como el sol forma los mismos ángulos sobre ambos objetos en el mismo instante, los triángulos poste-sombra y árbol-sombra son semejantes: 3/2 = x/8, de donde x = 3·8/2 = 12 metros.',
+        dato_curioso:'Eratóstenes usó una idea parecida, pero comparando sombras en dos ciudades distintas el mismo día, para calcular la circunferencia de la Tierra con un error de apenas unos cientos de kilómetros — hace más de 2.200 años.'
+      },
+      {
+        tema:'Área de un triángulo', enunciado:'Un triángulo tiene una base de 10 cm y una altura de 6 cm, medida perpendicular a esa base. ¿Cuál es su área?',
+        figura_svg:'<svg viewBox="0 0 280 170" xmlns="http://www.w3.org/2000/svg"><polygon points="30,150 230,150 110,40" stroke="#2B2B2E" stroke-width="1.6" fill="none"/><line x1="110" y1="40" x2="110" y2="150" stroke="#2B2B2E" stroke-width="1.2" stroke-dasharray="4 3"/><text x="118" y="98" font-size="12" fill="#2B2B2E">6</text><text x="120" y="165" font-size="12" fill="#2B2B2E">10</text></svg>',
+        opciones:['16','24','30','60'], respuesta_correcta:2,
+        pista:'Fórmula: Área = (base × altura) / 2.',
+        desarrollo:'El área de un triángulo es (base × altura) / 2 = (10 × 6) / 2 = 30 cm².',
+        dato_curioso:''
+      },
+      {
+        tema:'Ángulos de un hexágono', enunciado:'¿Cuánto mide cada ángulo interior de un hexágono regular?',
+        figura_svg:'', opciones:['100°','108°','120°','135°'], respuesta_correcta:2,
+        pista:'Suma de ángulos interiores = (n − 2) × 180°.',
+        desarrollo:'La suma de los ángulos interiores de un polígono de n lados es (n−2)×180°. Para un hexágono (n=6): 4×180° = 720°, y como es regular se reparte en 6 ángulos iguales: 720°/6 = 120°.',
+        dato_curioso:'Las abejas construyen sus panales con celdas hexagonales porque esa forma cubre el plano sin dejar espacios vacíos usando el mínimo de cera posible — un resultado que los matemáticos recién demostraron con rigor total en 1999 (la "conjetura del panal").'
+      },
+      {
+        tema:'Evaluar una función', enunciado:'Si f(x) = 3x − 2, ¿cuánto vale f(4)?',
+        figura_svg:'', grafica_datos:{coeficientes:[3,-2], rango_x:[-1,5], punto_x:4, mostrar_tangente:false},
+        opciones:['8','10','12','14'], respuesta_correcta:1,
+        pista:'Reemplaza x por el valor dado y resuelve paso a paso.',
+        desarrollo:'Reemplaza x por 4: f(4) = 3·4 − 2 = 12 − 2 = 10.',
+        dato_curioso:''
+      },
+      {
+        tema:'Derivada de una potencia', enunciado:'¿Cuál es la derivada de f(x) = x³?',
+        figura_svg:'', grafica_datos:{coeficientes:[1,0,0,0], rango_x:[-2,2], punto_x:null, mostrar_tangente:false},
+        opciones:['x²','3x²','3x³','x²/3'], respuesta_correcta:1,
+        pista:'Regla de la potencia: derivada de xⁿ es n·x elevado a (n−1).',
+        desarrollo:'Por la regla de la potencia, la derivada de xⁿ es n·x elevado a (n−1). Con n=3, la derivada queda 3x².',
+        dato_curioso:'Newton y Leibniz desarrollaron el cálculo diferencial casi al mismo tiempo, de forma independiente, en el siglo XVII — lo que generó una disputa histórica sobre quién lo inventó primero.'
+      },
+      {
+        tema:'Derivada y pendiente', enunciado:'Si f(x) = x² y evaluamos su derivada en x = 3, ¿qué representa ese valor?',
+        figura_svg:'', grafica_datos:{coeficientes:[1,0,0], rango_x:[-1,5], punto_x:3, mostrar_tangente:true},
+        opciones:['El valor de f en x=3','La pendiente de la recta tangente a f en x=3','El área bajo la curva hasta x=3','El punto donde f corta al eje x'], respuesta_correcta:1,
+        pista:'La derivada evaluada en un punto es la pendiente de la tangente ahí.',
+        desarrollo:'La derivada evaluada en un punto entrega la pendiente de la recta tangente a la curva en ese punto. Como la derivada de f es 2x, evaluada en x=3 esa pendiente vale 6.',
+        dato_curioso:''
+      },
+      {
+        tema:'Porcentaje simple', enunciado:'Un producto cuesta $8.000 y tiene un descuento del 25%. ¿Cuál es el precio final?',
+        figura_svg:'', opciones:['$6.000','$2.000','$7.000','$6.500'], respuesta_correcta:0,
+        pista:'Calcula el descuento (% del precio) y réstalo al precio original.',
+        desarrollo:'El 25% de 8.000 es 2.000, así que el precio final es 8.000 − 2.000 = 6.000.',
+        dato_curioso:''
+      },
+      {
+        tema:'Área de un círculo', enunciado:'Un círculo tiene radio 5 cm. Usando π ≈ 3 para calcular de cabeza, ¿cuál es aproximadamente su área?',
+        figura_svg:'', grafica_datos:null, opciones:['75','50','25','150'], respuesta_correcta:0,
+        pista:'Fórmula: Área = π × radio².',
+        desarrollo:'Área ≈ π·r² ≈ 3 × 5² = 3 × 25 = 75 cm² (aproximando π a 3 para resolver de cabeza).',
+        dato_curioso:'El símbolo π se popularizó recién en el siglo XVIII; antes cada matemático usaba su propia notación para esta constante.'
+      },
+      {
+        tema:'Perímetro con área dada', enunciado:'Un rectángulo tiene área 24 cm² y uno de sus lados mide 4 cm. ¿Cuánto mide su perímetro?',
+        figura_svg:'', grafica_datos:null, opciones:['20','24','16','28'], respuesta_correcta:0,
+        pista:'Primero encuentra el lado que falta dividiendo el área por el lado conocido.',
+        desarrollo:'El lado que falta es 24/4 = 6 cm. El perímetro es 2×(4+6) = 20 cm.',
+        dato_curioso:''
+      },
+      {
+        tema:'Ángulos internos de un triángulo', enunciado:'En un triángulo, dos de sus ángulos miden 50° y 70°. ¿Cuánto mide el tercero?',
+        figura_svg:'', grafica_datos:null, opciones:['60°','50°','70°','80°'], respuesta_correcta:0,
+        pista:'Los ángulos internos de un triángulo siempre suman 180°.',
+        desarrollo:'180° − 50° − 70° = 60°.',
+        dato_curioso:'Esta propiedad solo es exacta en geometría plana: en una superficie curva, como la de una esfera, los ángulos de un triángulo pueden sumar más de 180°.'
+      },
+      {
+        tema:'Triángulos congruentes', enunciado:'Dos triángulos son congruentes. Si uno tiene lados de 5, 7 y 9 cm, ¿cuánto mide el lado más largo del otro triángulo?',
+        figura_svg:'', grafica_datos:null, opciones:['9','7','5','8'], respuesta_correcta:0,
+        pista:'Triángulos congruentes tienen exactamente los mismos lados y ángulos.',
+        desarrollo:'Si son congruentes, tienen los mismos tres lados — el más largo también mide 9 cm.',
+        dato_curioso:''
+      },
+      {
+        tema:'Circunferencia', enunciado:'Un círculo tiene diámetro 10 cm. Usando π ≈ 3, ¿cuál es aproximadamente su circunferencia?',
+        figura_svg:'', grafica_datos:null, opciones:['30','15','60','20'], respuesta_correcta:0,
+        pista:'Fórmula: circunferencia = π × diámetro.',
+        desarrollo:'Circunferencia ≈ 3 × 10 = 30 cm.',
+        dato_curioso:''
+      },
+      {
+        tema:'Dominio de una función', enunciado:'¿Para qué valor de x la función f(x) = 1/(x−3) NO está definida?',
+        figura_svg:'', grafica_datos:null, opciones:['x=3','x=0','x=-3','x=1'], respuesta_correcta:0,
+        pista:'Piensa en qué valor hace que el denominador sea cero.',
+        desarrollo:'Cuando x=3, el denominador (x−3) se hace cero, y la división por cero no está definida — ese valor queda fuera del dominio.',
+        dato_curioso:''
+      },
+      {
+        tema:'Intercepto de una recta', enunciado:'La recta f(x) = 2x + 6 corta al eje x cuando f(x) = 0. ¿En qué valor de x ocurre eso?',
+        figura_svg:'', grafica_datos:{coeficientes:[2,6], rango_x:[-5,2], punto_x:-3, mostrar_tangente:false}, opciones:['-3','3','-6','6'], respuesta_correcta:0,
+        pista:'Iguala la función a cero y despeja x.',
+        desarrollo:'2x + 6 = 0 → 2x = −6 → x = −3.',
+        dato_curioso:''
+      },
+      {
+        tema:'Composición de funciones', enunciado:'Si f(x) = x + 2 y g(x) = 3x, ¿cuánto vale f(g(2))?',
+        figura_svg:'', grafica_datos:null, opciones:['8','6','10','12'], respuesta_correcta:0,
+        pista:'Primero calcula g(2), y ese resultado úsalo como entrada de f.',
+        desarrollo:'g(2) = 3×2 = 6. Luego f(6) = 6+2 = 8.',
+        dato_curioso:''
+      },
+      {
+        tema:'Vértice de una parábola', enunciado:'La función f(x) = x² tiene su valor mínimo en x = 0. ¿Cuánto vale f(0)?',
+        figura_svg:'', grafica_datos:{coeficientes:[1,0,0], rango_x:[-3,3], punto_x:0, mostrar_tangente:false}, opciones:['0','1','-1','2'], respuesta_correcta:0,
+        pista:'Reemplaza x por 0 directamente.',
+        desarrollo:'f(0) = 0² = 0. Es el punto más bajo (vértice) de esta parábola.',
+        dato_curioso:''
+      },
+      {
+        tema:'Derivada de una constante', enunciado:'¿Cuál es la derivada de f(x) = 7 (una función constante)?',
+        figura_svg:'', grafica_datos:null, opciones:['0','7','1','x'], respuesta_correcta:0,
+        pista:'La pendiente de una recta horizontal siempre es cero.',
+        desarrollo:'La derivada de cualquier constante es 0, porque una función constante no cambia — su gráfico es una recta horizontal sin pendiente.',
+        dato_curioso:''
+      },
+      {
+        tema:'Derivada de un binomio', enunciado:'¿Cuál es la derivada de f(x) = x² + 4x?',
+        figura_svg:'', grafica_datos:null, opciones:['2x + 4','x + 4','2x','2x² + 4'], respuesta_correcta:0,
+        pista:'Deriva cada término por separado usando la regla de la potencia.',
+        desarrollo:'La derivada de x² es 2x, y la derivada de 4x es 4. Sumando: 2x + 4.',
+        dato_curioso:''
+      },
+      {
+        tema:'Evaluar una derivada', enunciado:'Si f(x) = 2x², ¿cuánto vale su derivada evaluada en x = 1?',
+        figura_svg:'', grafica_datos:{coeficientes:[2,0,0], rango_x:[-2,3], punto_x:1, mostrar_tangente:true}, opciones:['4','2','1','8'], respuesta_correcta:0,
+        pista:'Primero deriva la función, luego reemplaza x por 1.',
+        desarrollo:'La derivada de f(x)=2x² es 4x. Evaluada en x=1, el resultado es 4.',
+        dato_curioso:''
+      },
+      {
+        tema:'Signo de la derivada', enunciado:'Si la derivada de una función es negativa en cierto intervalo, ¿qué está haciendo la función en ese tramo?',
+        figura_svg:'', grafica_datos:null, opciones:['Está decreciendo','Está creciendo','Es constante','Tiene un máximo'], respuesta_correcta:0,
+        pista:'El signo de la derivada indica si la función sube o baja.',
+        desarrollo:'Una derivada negativa significa que la pendiente de la curva es negativa en ese tramo: la función está decreciendo (bajando) a medida que x aumenta.',
+        dato_curioso:''
+      },
+      {
+        tema:'Ecuación de un paso', enunciado:'Si 3x = 21, ¿cuánto vale x?',
+        figura_svg:'', grafica_datos:null, opciones:['7','8','6','9'], respuesta_correcta:0,
+        pista:'Divide ambos lados por el coeficiente de x.',
+        desarrollo:'x = 21/3 = 7.',
+        dato_curioso:''
+      },
+      {
+        tema:'Proporción inversa', enunciado:'Si 4 obreros construyen un muro en 6 días, ¿cuántos días tardarían 8 obreros trabajando al mismo ritmo?',
+        figura_svg:'', grafica_datos:null, opciones:['3','12','8','2'], respuesta_correcta:0,
+        pista:'A más obreros, menos días — es una proporción inversa.',
+        desarrollo:'El trabajo total es 4×6=24 "obrero-días". Con 8 obreros: 24/8 = 3 días.',
+        dato_curioso:''
+      },
+      {
+        tema:'Sucesión numérica', enunciado:'¿Qué número sigue en la secuencia 2, 5, 8, 11, __?',
+        figura_svg:'', grafica_datos:null, opciones:['14','13','15','12'], respuesta_correcta:0,
+        pista:'Fíjate en cuánto aumenta cada número respecto al anterior.',
+        desarrollo:'Cada número aumenta en 3 respecto al anterior: 11+3 = 14.',
+        dato_curioso:''
+      },
+      {
+        tema:'Porcentaje inverso', enunciado:'Después de un aumento del 20%, un producto cuesta $12.000. ¿Cuánto costaba antes del aumento?',
+        figura_svg:'', grafica_datos:null, opciones:['$10.000','$9.600','$10.400','$11.000'], respuesta_correcta:0,
+        pista:'El precio final representa el 120% del precio original.',
+        desarrollo:'Si $12.000 es el 120% del precio original, el precio original es 12.000/1,2 = $10.000.',
+        dato_curioso:''
+      },
+      {
+        tema:'Media aritmética', enunciado:'Un alumno tiene notas 5,0; 6,0 y 7,0 en tres pruebas. ¿Cuál es su promedio?',
+        figura_svg:'', grafica_datos:null, opciones:['6,0','5,5','6,5','5,0'], respuesta_correcta:0,
+        pista:'Suma todas las notas y divide por la cantidad de pruebas.',
+        desarrollo:'(5,0+6,0+7,0)/3 = 18/3 = 6,0.',
+        dato_curioso:''
+      }
+    ],
+    historia: [
+      {
+        tema:'Maratón de Atenas', enunciado:'La distancia oficial del maratón (42,195 km) se fijó recién en unos Juegos Olímpicos del siglo XX, no en la Grecia antigua. ¿En qué edición se estableció esa cifra exacta?',
+        figura_svg:'', opciones:['Atenas 1896','Londres 1908','Estocolmo 1912','Amberes 1920'], respuesta_correcta:1,
+        pista:'Piensa en qué sede alargó el recorrido más allá de los ~40 km de Atenas 1896.',
+        desarrollo:'En Londres 1908 el recorrido se extendió para partir en el Castillo de Windsor y terminar frente al palco real, dando 42,195 km — distancia que luego se volvió el estándar oficial.',
+        dato_curioso:'Antes de 1908 cada maratón olímpico tenía una distancia distinta: la de Atenas 1896 midió unos 40 km.'
+      },
+      {
+        tema:'Don Quijote', enunciado:'Miguel de Cervantes publicó la segunda parte de "El ingenioso hidalgo don Quijote de la Mancha" en 1615. ¿En qué año había publicado la primera parte?',
+        figura_svg:'', opciones:['1595','1605','1615','1620'], respuesta_correcta:1,
+        pista:'Entre la primera y la segunda parte pasó exactamente una década.',
+        desarrollo:'La primera parte se publicó en 1605 y tuvo tanto éxito que circularon continuaciones apócrifas antes de que el propio Cervantes publicara la segunda parte diez años después, en 1615.',
+        dato_curioso:'Esa segunda parte de 1615 es considerada por muchos críticos una de las primeras novelas "metaliterarias": sus personajes ya saben que son famosos por haber salido en un libro.'
+      },
+      {
+        tema:'La Gioconda', enunciado:'¿En qué museo se exhibe actualmente La Gioconda (Mona Lisa) de Leonardo da Vinci?',
+        figura_svg:'', opciones:['Museo del Prado','Museo del Louvre','Uffizi','Rijksmuseum'], respuesta_correcta:1,
+        pista:'Es el museo más visitado del mundo, a orillas del Sena en París.',
+        desarrollo:'La Gioconda se exhibe en el Museo del Louvre, en París, donde llegó como parte de la colección real francesa mucho antes de que el museo abriera al público en 1793.',
+        dato_curioso:'En 1911 la pintura fue robada del Louvre por un empleado italiano que la mantuvo escondida más de dos años; la búsqueda mediática que generó el robo ayudó a volverla mundialmente famosa.'
+      },
+      {
+        tema:'Caída del Muro de Berlín', enunciado:'¿En qué año cayó el Muro de Berlín, símbolo de la división entre Alemania Oriental y Occidental?',
+        figura_svg:'', opciones:['1979','1989','1991','1999'], respuesta_correcta:1,
+        pista:'Ocurrió el mismo año en que empezaba a desmoronarse el bloque soviético.',
+        desarrollo:'El muro cayó en noviembre de 1989, tras semanas de protestas masivas y un anuncio confuso de un vocero del gobierno de Alemania Oriental que la gente interpretó como apertura inmediata de las fronteras.',
+        dato_curioso:'Ese anuncio fue casi accidental: el vocero Günter Schabowski respondió mal una pregunta en conferencia de prensa, y esa misma noche miles de berlineses ya estaban en los cruces fronterizos exigiendo pasar.'
+      },
+      {
+        tema:'Einstein y la relatividad', enunciado:'Albert Einstein publicó su teoría general de la relatividad en 1915. ¿Diez años antes, en 1905, qué otra teoría suya revolucionó la física?',
+        figura_svg:'', opciones:['La relatividad especial','La mecánica cuántica','La teoría de cuerdas','El modelo atómico'], respuesta_correcta:0,
+        pista:'Se conoce como su "año milagroso": publicó varios artículos clave en 1905.',
+        desarrollo:'En 1905 —su "año milagroso"— Einstein publicó la relatividad especial, además de trabajos sobre el efecto fotoeléctrico y el movimiento browniano. Una década más tarde extendió esas ideas a la gravedad con la relatividad general.',
+        dato_curioso:'Einstein escribió esos cuatro artículos de 1905 mientras trabajaba como empleado en la oficina de patentes de Berna, no en una universidad.'
+      },
+      {
+        tema:'Guerra del Pacífico', enunciado:'¿En qué año se firmó el Tratado de Ancón, que puso fin a la Guerra del Pacífico entre Chile y Perú?',
+        figura_svg:'', opciones:['1879','1881','1883','1888'], respuesta_correcta:2,
+        pista:'El tratado lleva el nombre de una localidad cercana a Lima.',
+        desarrollo:'El Tratado de Ancón se firmó en 1883, formalizando la cesión de Tarapacá a Chile; la situación de Tacna y Arica quedó pendiente para un plebiscito posterior que nunca se realizó como estaba previsto.',
+        dato_curioso:'El destino final de Tacna y Arica se resolvió recién en 1929, con la mediación de Estados Unidos, casi medio siglo después de terminada la guerra.'
+      },
+      {
+        tema:'Primer Mundial de fútbol', enunciado:'La primera Copa Mundial de fútbol se jugó en 1930 en Sudamérica. ¿Qué selección fue la primera campeona?',
+        figura_svg:'', opciones:['Uruguay','Argentina','Brasil','Italia'], respuesta_correcta:0,
+        pista:'Fue el país anfitrión, y venció a su rival del Río de la Plata en la final.',
+        desarrollo:'Uruguay, el país anfitrión, venció a Argentina 4-2 en la final disputada en Montevideo, y se coronó como el primer campeón mundial de fútbol.',
+        dato_curioso:'Solo 13 selecciones participaron en ese primer Mundial, y varios equipos europeos llegaron en barco, un viaje de casi tres semanas.'
+      },
+      {
+        tema:'Nobel de Neruda', enunciado:'¿Qué poeta chileno ganó el Premio Nobel de Literatura en 1971?',
+        figura_svg:'', opciones:['Pablo Neruda','Gabriela Mistral','Nicanor Parra','Vicente Huidobro'], respuesta_correcta:0,
+        pista:'Escribió "Veinte poemas de amor y una canción desesperada".',
+        desarrollo:'Pablo Neruda recibió el Nobel de Literatura en 1971, reconocido por una poesía descrita por la Academia sueca como una fuerza capaz de dar vida a los sueños de un continente.',
+        dato_curioso:'Chile es el único país latinoamericano con dos premios Nobel de Literatura: Neruda en 1971 y, antes que él, Gabriela Mistral en 1945 — la primera latinoamericana en ganarlo.'
+      },
+      {
+        tema:'El origen de las especies', enunciado:'¿En qué libro, publicado en 1859, Charles Darwin expuso su teoría de la evolución por selección natural?',
+        figura_svg:'', opciones:['El origen de las especies','El origen del hombre','Viaje de un naturalista','La expresión de las emociones'], respuesta_correcta:0,
+        pista:'El título habla del origen de algo relacionado con la biología.',
+        desarrollo:'En "El origen de las especies" (1859), Darwin planteó que las especies evolucionan mediante selección natural, una idea que maduró durante años tras su viaje en el HMS Beagle.',
+        dato_curioso:'Darwin retrasó casi 20 años la publicación del libro, en parte por temor a la controversia religiosa y científica que sabía que iba a generar.'
+      },
+      {
+        tema:'Toma de la Bastilla', enunciado:'¿En qué año comenzó la Revolución Francesa, marcada por la toma de la Bastilla?',
+        figura_svg:'', opciones:['1776','1789','1799','1804'], respuesta_correcta:1,
+        pista:'Fue el mismo año en que Estados Unidos ya llevaba más de una década de independiente.',
+        desarrollo:'La Revolución Francesa estalló en 1789, con la toma de la Bastilla el 14 de julio como uno de sus hitos fundacionales, y terminó transformando radicalmente el orden político europeo.',
+        dato_curioso:'Ese mismo 14 de julio la prisión de la Bastilla tenía solo siete presos dentro, pero ya era el símbolo del poder absoluto que la multitud quería derribar.'
+      },
+      {
+        tema:'Independencia de Chile', enunciado:'¿En qué año se firmó el Acta de Independencia de Chile?',
+        figura_svg:'', opciones:['1810','1814','1817','1818'], respuesta_correcta:3,
+        pista:'Fue semanas después de la batalla de Maipú, no en 1810.',
+        desarrollo:'El Acta de Independencia se firmó en 1818, ocho años después del primer gobierno nacional de 1810 que solo había iniciado el proceso, y semanas después de la victoria decisiva en la batalla de Maipú.',
+        dato_curioso:'El 12 de febrero de 1818, día de la firma, también se cumplía el primer aniversario de la batalla de Chacabuco, otra victoria clave de la campaña libertadora.'
+      },
+      {
+        tema:'Primera vacuna', enunciado:'¿Qué científico desarrolló la primera vacuna, contra la viruela, en 1796?',
+        figura_svg:'', opciones:['Louis Pasteur','Edward Jenner','Alexander Fleming','Robert Koch'], respuesta_correcta:1,
+        pista:'La palabra "vacuna" viene del latín "vacca" por el animal que usó.',
+        desarrollo:'Edward Jenner inoculó en 1796 material de una llaga de viruela bovina a un niño, demostrando que quedaba protegido frente a la viruela humana — el nacimiento de la vacunación.',
+        dato_curioso:'Pasteur, casi un siglo después, usó la palabra "vacuna" para honrar el trabajo de Jenner, aunque sus propias vacunas —como la de la rabia— no tenían relación con las vacas.'
+      },
+      {
+        tema:'Primeros Juegos Olímpicos modernos', enunciado:'¿En qué ciudad se realizaron los primeros Juegos Olímpicos de la era moderna, en 1896?',
+        figura_svg:'', opciones:['Londres','París','Atenas','Roma'], respuesta_correcta:2,
+        pista:'Fue un homenaje directo al origen griego de los Juegos antiguos.',
+        desarrollo:'Atenas fue elegida sede de los primeros Juegos Olímpicos modernos en 1896, impulsados por el barón Pierre de Coubertin como homenaje al origen griego de los Juegos antiguos.',
+        dato_curioso:'En esos primeros Juegos no compitieron mujeres; recién se incorporaron en París 1900, y solo en unas pocas disciplinas como tenis y golf.'
+      },
+      {
+        tema:'Cien años de soledad', enunciado:'¿Qué novela de Gabriel García Márquez, publicada en 1967, es considerada la obra cumbre del "realismo mágico" latinoamericano?',
+        figura_svg:'', opciones:['El amor en los tiempos del cólera','Cien años de soledad','Crónica de una muerte anunciada','El otoño del patriarca'], respuesta_correcta:1,
+        pista:'Transcurre en el pueblo ficticio de Macondo, a lo largo de varias generaciones.',
+        desarrollo:'"Cien años de soledad" (1967) narra varias generaciones de la familia Buendía en el pueblo ficticio de Macondo, y se convirtió en la obra más representativa del realismo mágico latinoamericano.',
+        dato_curioso:'García Márquez ganó el Premio Nobel de Literatura en 1982, en gran parte gracias al impacto mundial de esta novela.'
+      },
+      {
+        tema:'Guernica de Picasso', enunciado:'¿Qué evento histórico retrató Pablo Picasso en su famoso cuadro "Guernica" (1937)?',
+        figura_svg:'', opciones:['El bombardeo de una ciudad vasca durante la Guerra Civil Española','La Segunda Guerra Mundial','La Revolución Rusa','La Guerra Civil estadounidense'], respuesta_correcta:0,
+        pista:'El cuadro lleva el nombre de la ciudad que fue bombardeada.',
+        desarrollo:'Picasso pintó "Guernica" tras el bombardeo de esa ciudad vasca por la aviación alemana e italiana en 1937, durante la Guerra Civil Española, como una denuncia del horror de la guerra sobre la población civil.',
+        dato_curioso:'El cuadro estuvo exiliado en el MoMA de Nueva York por decisión del propio Picasso, que pidió que no volviera a España hasta que el país recuperara la democracia; regresó recién en 1981.'
+      },
+      {
+        tema:'Invención del baloncesto', enunciado:'El baloncesto fue inventado en 1891 por James Naismith, un profesor de educación física. ¿En qué país enseñaba cuando lo inventó?',
+        figura_svg:'', opciones:['Estados Unidos','Canadá','Inglaterra','Escocia'], respuesta_correcta:0,
+        pista:'El inventor era canadiense, pero enseñaba en otro país cuando creó el deporte.',
+        desarrollo:'Naismith, aunque nacido en Canadá, inventó el baloncesto en 1891 mientras trabajaba en una escuela de Springfield, Massachusetts, Estados Unidos, buscando un juego de interior para el invierno.',
+        dato_curioso:'El primer balón usado fue una pelota de fútbol, y los primeros aros eran literalmente canastos de duraznos con el fondo cerrado — había que sacar la pelota a mano cada vez que encestaban.'
+      },
+      {
+        tema:'Romeo y Julieta', enunciado:'¿Quién escribió "Romeo y Julieta", obra estrenada a fines del siglo XVI?',
+        figura_svg:'', opciones:['William Shakespeare','Christopher Marlowe','Charles Dickens','Miguel de Cervantes'], respuesta_correcta:0,
+        pista:'Es el mismo autor de "Hamlet" y "Macbeth".',
+        desarrollo:'William Shakespeare escribió "Romeo y Julieta" alrededor de 1595, una de las tragedias más representadas de la historia del teatro.',
+        dato_curioso:'La historia de los amantes de Verona no fue una idea original de Shakespeare: se basó en relatos italianos e ingleses previos que ya circulaban décadas antes.'
+      },
+      {
+        tema:'Capilla Sixtina', enunciado:'¿Qué artista pintó el techo de la Capilla Sixtina, terminado en 1512?',
+        figura_svg:'', opciones:['Miguel Ángel','Rafael','Leonardo da Vinci','Donatello'], respuesta_correcta:0,
+        pista:'También esculpió el "David" en Florencia.',
+        desarrollo:'Miguel Ángel pintó el techo de la Capilla Sixtina entre 1508 y 1512, por encargo del papa Julio II, trabajando durante años sobre un andamio.',
+        dato_curioso:'Miguel Ángel se consideraba principalmente escultor y al inicio se resistió al encargo, alegando que la pintura no era su oficio.'
+      },
+      {
+        tema:'Descubrimiento del polonio', enunciado:'¿Qué elemento químico descubrió Marie Curie junto a su esposo Pierre, bautizado en honor al país natal de Marie?',
+        figura_svg:'', opciones:['Polonio','Radio','Uranio','Curio'], respuesta_correcta:0,
+        pista:'El nombre del elemento hace referencia directa a un país de Europa del Este.',
+        desarrollo:'Marie Curie, nacida en Polonia, descubrió junto a Pierre Curie el elemento polonio en 1898, y lo nombró en honor a su país natal, entonces sin independencia política.',
+        dato_curioso:'Marie Curie fue la primera persona en ganar dos premios Nobel en disciplinas científicas distintas: Física en 1903 y Química en 1911.'
+      },
+      {
+        tema:'Fin de la Segunda Guerra Mundial', enunciado:'¿En qué año terminó la Segunda Guerra Mundial?',
+        figura_svg:'', opciones:['1943','1945','1947','1950'], respuesta_correcta:1,
+        pista:'Fue el mismo año en que se fundó la ONU.',
+        desarrollo:'La Segunda Guerra Mundial terminó en 1945, tras la rendición de Alemania en mayo y la de Japón en septiembre, luego de las bombas atómicas sobre Hiroshima y Nagasaki.',
+        dato_curioso:'Ese mismo año, en octubre de 1945, se fundó oficialmente la Organización de las Naciones Unidas, buscando evitar una nueva guerra mundial.'
+      },
+      {
+        tema:'Director Supremo de Chile', enunciado:'Tras la Batalla de Chacabuco en 1817, ¿quién asumió como primer Director Supremo de la naciente Chile independiente?',
+        figura_svg:'', opciones:['Bernardo O\'Higgins','José de San Martín','Manuel Rodríguez','Ramón Freire'], respuesta_correcta:0,
+        pista:'Es el mismo prócer que luego firmó la Declaración de Independencia en 1818.',
+        desarrollo:'Bernardo O\'Higgins asumió como Director Supremo tras Chacabuco, cargo que ejerció hasta 1823, liderando además la Declaración de Independencia de 1818.',
+        dato_curioso:'O\'Higgins era hijo del gobernador colonial Ambrosio O\'Higgins, de origen irlandés — uno de los apellidos menos "chilenos" entre los próceres de la independencia.'
+      },
+      {
+        tema:'Imprenta de Gutenberg', enunciado:'¿Qué invento de Johannes Gutenberg, hacia 1440, revolucionó la difusión del conocimiento en Europa?',
+        figura_svg:'', opciones:['La imprenta de tipos móviles','El telescopio','La brújula','El papel'], respuesta_correcta:0,
+        pista:'Permitió reproducir libros mucho más rápido que copiándolos a mano.',
+        desarrollo:'Gutenberg desarrolló hacia 1440 la imprenta de tipos móviles, que permitió reproducir textos en serie y abarató enormemente el acceso a los libros en Europa.',
+        dato_curioso:'La primera gran obra impresa con esta tecnología fue la Biblia de Gutenberg, de la que hoy sobreviven menos de 50 ejemplares completos en el mundo.'
+      },
+      {
+        tema:'Origen del rugby', enunciado:'Según la tradición, ¿en qué país se originó el rugby, en el colegio inglés que le da nombre al deporte?',
+        figura_svg:'', opciones:['Inglaterra','Escocia','Gales','Irlanda'], respuesta_correcta:0,
+        pista:'El deporte lleva el nombre de un colegio inglés.',
+        desarrollo:'Según la tradición, el rugby nació en el Rugby School de Inglaterra, donde en 1823 un alumno habría tomado la pelota con las manos durante un partido de fútbol, dando origen al nuevo juego.',
+        dato_curioso:'Esa historia del alumno (William Webb Ellis) es probablemente una leyenda posterior, pero igual se le rinde homenaje: el trofeo del Mundial de Rugby lleva su nombre.'
+      },
+      {
+        tema:'Novena Sinfonía de Beethoven', enunciado:'¿Qué compositor alemán, casi completamente sordo en sus últimos años, escribió la Novena Sinfonía?',
+        figura_svg:'', opciones:['Ludwig van Beethoven','Wolfgang Amadeus Mozart','Johann Sebastian Bach','Franz Schubert'], respuesta_correcta:0,
+        pista:'Compuso esta sinfonía cuando ya casi no podía oír.',
+        desarrollo:'Beethoven compuso su Novena Sinfonía entre 1822 y 1824, cuando ya había perdido casi por completo la audición.',
+        dato_curioso:'Esa sinfonía incluye el "Himno a la Alegría", que hoy es el himno oficial de la Unión Europea.'
+      },
+      {
+        tema:'Imperio colonial en América', enunciado:'¿Qué imperio gobernó gran parte de América Latina antes de las independencias del siglo XIX, con capital en Madrid?',
+        figura_svg:'', opciones:['El Imperio español','El Imperio portugués','El Imperio británico','El Imperio otomano'], respuesta_correcta:0,
+        pista:'Su idioma es hoy el más hablado en la región.',
+        desarrollo:'La Corona española gobernó la mayor parte de América Latina (excepto Brasil, colonia portuguesa) durante unos 300 años, hasta las guerras de independencia de comienzos del siglo XIX.',
+        dato_curioso:''
+      },
+      {
+        tema:'Terremoto de Valdivia', enunciado:'¿Qué desastre natural de 1960, ocurrido en el sur de Chile, sigue siendo el terremoto más potente jamás registrado instrumentalmente?',
+        figura_svg:'', opciones:['El terremoto de Valdivia','El terremoto de Chillán','El terremoto de Talca','El maremoto de Arica'], respuesta_correcta:0,
+        pista:'Ocurrió cerca de una ciudad del sur, en mayo de 1960.',
+        desarrollo:'El terremoto de Valdivia de 1960 alcanzó una magnitud de 9,5, la mayor jamás medida con instrumentos sismológicos modernos, y generó un tsunami que cruzó el Pacífico hasta Japón.',
+        dato_curioso:'Ese tsunami tardó unas 22 horas en llegar hasta Hawái y Japón, causando allí también víctimas y daños, a miles de kilómetros del epicentro.'
+      },
+      {
+        tema:'Leyes de Newton', enunciado:'¿Qué científico formuló las tres leyes del movimiento y la ley de gravitación universal en el siglo XVII?',
+        figura_svg:'', opciones:['Isaac Newton','Galileo Galilei','Johannes Kepler','René Descartes'], respuesta_correcta:0,
+        pista:'También es célebre por la (probablemente legendaria) manzana que le cayó encima.',
+        desarrollo:'Isaac Newton publicó sus leyes del movimiento y la ley de gravitación universal en 1687, una de las bases de la física clásica.',
+        dato_curioso:'Newton desarrolló buena parte de estas ideas durante 1665-1666, cuando la Universidad de Cambridge cerró por una epidemia de peste y él volvió a la casa de su familia.'
+      },
+      {
+        tema:'Hamlet', enunciado:'¿Qué obra de Shakespeare trata sobre un príncipe danés que busca vengar la muerte de su padre?',
+        figura_svg:'', opciones:['Hamlet','Macbeth','Otelo','El rey Lear'], respuesta_correcta:0,
+        pista:'El protagonista es un príncipe, no un rey.',
+        desarrollo:'"Hamlet" narra la historia del príncipe de Dinamarca que busca vengar el asesinato de su padre a manos de su tío, quien luego se casa con su madre.',
+        dato_curioso:'La frase "ser o no ser", una de las más citadas de la literatura en inglés, proviene de un monólogo de esta obra.'
+      }
+    ],
+    economia: [
+      {
+        tema:'EBITDA', enunciado:'Una empresa tiene ingresos por 100, costos operativos por 60, depreciación por 10 e intereses por 5. ¿Cuál es su EBITDA?',
+        figura_svg:'', opciones:['25','30','35','40'], respuesta_correcta:3,
+        pista:'Ingresos menos costos operativos — sin restar depreciación ni intereses.',
+        desarrollo:'EBITDA = utilidad antes de intereses, impuestos, depreciación y amortización. Se calcula solo con ingresos menos costos operativos: 100 - 60 = 40. La depreciación y los intereses no se restan.',
+        dato_curioso:'El término se popularizó en los años 80 entre inversionistas de private equity para comparar empresas ignorando sus estructuras de deuda y de activos, muy distintas entre sí.'
+      },
+      {
+        tema:'IPC', enunciado:'¿Qué mide principalmente el IPC (Índice de Precios al Consumidor) en Chile?',
+        figura_svg:'', opciones:['La variación de precios de una canasta de bienes y servicios','El crecimiento del PIB','La tasa de desempleo','El tipo de cambio del dólar'], respuesta_correcta:0,
+        pista:'Piensa en qué mide literalmente un "índice de precios".',
+        desarrollo:'El IPC sigue mes a mes el precio de una canasta representativa de bienes y servicios que consume un hogar típico; su variación porcentual es la medida más usada de inflación.',
+        dato_curioso:'El INE actualiza periódicamente qué productos entran en esa canasta para reflejar cambios en los hábitos de consumo — por ejemplo, ha ido incorporando streaming y comida a domicilio en revisiones recientes.'
+      },
+      {
+        tema:'TPM', enunciado:'Cuando el Banco Central de Chile sube la Tasa de Política Monetaria (TPM), ¿qué busca principalmente?',
+        figura_svg:'', opciones:['Encarecer el crédito para frenar la inflación','Abaratar el crédito para incentivar el consumo','Fijar el tipo de cambio','Aumentar directamente el gasto fiscal'], respuesta_correcta:0,
+        pista:'Subir la tasa hace el crédito más caro, no más barato.',
+        desarrollo:'Subir la TPM encarece los créditos y hace más atractivo ahorrar, lo que enfría el consumo y la inversión — una forma de moderar la inflación cuando los precios suben demasiado rápido.',
+        dato_curioso:'La TPM la decide el Consejo del Banco Central, un órgano autónomo del gobierno de turno desde 1989, precisamente para blindar la política monetaria de presiones políticas de corto plazo.'
+      },
+      {
+        tema:'UF', enunciado:'La UF (Unidad de Fomento) se reajusta día a día según la variación de ¿qué indicador del mes anterior?',
+        figura_svg:'', opciones:['El IPC','El precio del cobre','El IPSA','La TPM'], respuesta_correcta:0,
+        pista:'Se ajusta según la inflación medida el mes anterior.',
+        desarrollo:'El valor de la UF de cada día se calcula proyectando, día a día, la inflación (IPC) medida el mes calendario anterior — así busca mantener el poder adquisitivo de créditos y contratos denominados en UF.',
+        dato_curioso:'La UF se creó en Chile en 1967 y hoy se usa para casi todo lo que dura años: créditos hipotecarios, arriendos comerciales y hasta algunos honorarios profesionales.'
+      },
+      {
+        tema:'Oferta y demanda', enunciado:'Si la demanda de un bien aumenta y la oferta se mantiene igual, ¿qué debería pasar con su precio de equilibrio?',
+        figura_svg:'', opciones:['Debería subir','Debería bajar','Debería mantenerse igual','Depende solo del IVA'], respuesta_correcta:0,
+        pista:'Más compradores queriendo lo mismo, con igual oferta, empuja el precio hacia arriba.',
+        desarrollo:'Con más compradores dispuestos a pagar por la misma cantidad de bienes disponibles, el precio de equilibrio sube hasta que la cantidad demandada vuelve a igualar a la ofrecida.',
+        dato_curioso:''
+      },
+      {
+        tema:'PIB per cápita', enunciado:'El país A tiene un PIB total mayor que el país B, pero A tiene mucha más población que B. ¿Qué puede pasar con el PIB per cápita?',
+        figura_svg:'', opciones:['El país B puede tener un PIB per cápita más alto que A','El país A siempre tiene el PIB per cápita más alto','Ambos PIB per cápita son necesariamente iguales','El PIB per cápita no depende de la población'], respuesta_correcta:0,
+        pista:'Es el PIB dividido por la población, no el PIB total.',
+        desarrollo:'El PIB per cápita es el PIB total dividido por la población. Si B tiene mucha menos gente, ese mismo PIB (aunque menor en total) puede repartirse en un promedio más alto por persona que en A.',
+        dato_curioso:'Por eso el PIB per cápita, y no el PIB total, es el indicador que suele usarse para comparar el nivel de vida promedio entre países de tamaños muy distintos.'
+      },
+      {
+        tema:'Inflación y poder de compra', enunciado:'Si la inflación anual es del 4% y tu sueldo se mantiene igual en pesos, ¿qué pasa con tu poder de compra?',
+        figura_svg:'', opciones:['Disminuye','Aumenta','Se mantiene igual','Depende del dólar'], respuesta_correcta:0,
+        pista:'Piensa en cuántos bienes puedes comprar con el mismo sueldo si todo sube de precio.',
+        desarrollo:'Si los precios suben 4% al año y tu sueldo nominal no cambia, con la misma cantidad de pesos puedes comprar menos bienes y servicios que antes — tu poder de compra cae.',
+        dato_curioso:''
+      },
+      {
+        tema:'Cap rate inmobiliario', enunciado:'En bienes raíces, el "cap rate" de una propiedad se calcula dividiendo su ingreso operativo neto (NOI) anual por ¿qué otra variable?',
+        figura_svg:'', opciones:['El valor o precio de la propiedad','La superficie en m²','El monto del arriendo mensual','La tasa de interés hipotecaria'], respuesta_correcta:0,
+        pista:'Es un retorno: ingreso neto dividido por cuánto vale el activo.',
+        desarrollo:'El cap rate = NOI anual / valor de la propiedad. Es una forma rápida de comparar el retorno esperado de distintos activos inmobiliarios, sin considerar el financiamiento.',
+        dato_curioso:'Un cap rate más bajo suele reflejar activos percibidos como más seguros o mejor ubicados — los inversionistas aceptan un retorno menor a cambio de menos riesgo.'
+      },
+      {
+        tema:'NOI inmobiliario', enunciado:'En finanzas inmobiliarias, ¿qué significa la sigla NOI?',
+        figura_svg:'', opciones:['Ingreso operativo neto','Nueva oferta inmobiliaria','Índice de ocupación neta','Valor neto de inversión'], respuesta_correcta:0,
+        pista:'Son las siglas en inglés de un tipo de ingreso, antes de financiamiento e impuestos.',
+        desarrollo:'NOI (Net Operating Income) es el ingreso que genera una propiedad después de restar los gastos operativos, pero antes de descontar financiamiento e impuestos — la base para calcular el cap rate.',
+        dato_curioso:''
+      },
+      {
+        tema:'IPSA', enunciado:'¿Qué mide el IPSA (Índice de Precios Selectivo de Acciones) en Chile?',
+        figura_svg:'', opciones:['El desempeño combinado de las principales acciones que transan en la bolsa chilena','La inflación mensual','El tipo de cambio del peso','La tasa de interés de los créditos hipotecarios'], respuesta_correcta:0,
+        pista:'Es un índice bursátil, no un indicador de precios al consumidor.',
+        desarrollo:'El IPSA agrupa a las acciones más transadas de la Bolsa de Santiago; su variación refleja, en promedio, cómo se mueve el precio de esas acciones en conjunto.',
+        dato_curioso:''
+      },
+      {
+        tema:'Diversificación', enunciado:'Un inversionista reparte su dinero en distintos activos (acciones, bonos, bienes raíces) en vez de ponerlo todo en uno solo. ¿Qué principio financiero está aplicando?',
+        figura_svg:'', opciones:['Diversificación de riesgo','Apalancamiento','Arbitraje','Especulación'], respuesta_correcta:0,
+        pista:'"No pongas todos los huevos en la misma canasta."',
+        desarrollo:'Diversificar reduce el riesgo total de la cartera, porque es poco probable que todos los activos caigan de valor al mismo tiempo y por las mismas razones.',
+        dato_curioso:''
+      },
+      {
+        tema:'Apalancamiento', enunciado:'Una empresa financia una inversión con 70% deuda y 30% capital propio. Si la inversión sale mal, ¿qué efecto tiene ese alto nivel de deuda sobre las pérdidas del dueño?',
+        figura_svg:'', opciones:['Las amplifica','Las reduce','No tiene efecto','Las elimina'], respuesta_correcta:0,
+        pista:'La deuda multiplica el efecto de las ganancias, pero también el de las pérdidas.',
+        desarrollo:'El apalancamiento amplifica tanto las ganancias como las pérdidas: con solo 30% de capital propio invertido, una caída en el valor del activo golpea proporcionalmente mucho más fuerte ese capital propio.',
+        dato_curioso:''
+      },
+      {
+        tema:'Depreciación del peso', enunciado:'Si el dólar sube de $900 a $950 pesos chilenos, ¿qué pasa con el peso chileno frente al dólar?',
+        figura_svg:'', opciones:['El peso se deprecia (pierde valor)','El peso se aprecia (gana valor)','El peso no cambia','Depende solo de la TPM'], respuesta_correcta:0,
+        pista:'Piensa en cuántos pesos necesitas ahora para comprar lo mismo (un dólar).',
+        desarrollo:'Si se necesitan más pesos para comprar un dólar, el peso vale menos en términos relativos — eso es una depreciación del peso frente al dólar.',
+        dato_curioso:''
+      },
+      {
+        tema:'Riesgo país', enunciado:'El "riesgo país" de una economía emergente sube tras un evento político inesperado. ¿Qué efecto directo debería tener eso sobre el costo al que ese país puede endeudarse en el exterior?',
+        figura_svg:'', opciones:['Debería subir (pagar más interés)','Debería bajar','No tiene relación','Depende solo del Banco Central'], respuesta_correcta:0,
+        pista:'Más riesgo percibido por quien presta implica que exige una compensación mayor.',
+        desarrollo:'Un mayor riesgo país significa que los inversionistas exigen una compensación (tasa de interés) más alta por prestarle a ese país, ya que perciben más probabilidad de no pago.',
+        dato_curioso:''
+      },
+      {
+        tema:'Punto de equilibrio', enunciado:'Una empresa tiene costos fijos de $100.000 al mes y cada unidad que vende deja un margen de $2.000. ¿Cuántas unidades debe vender para llegar al punto de equilibrio?',
+        figura_svg:'', opciones:['50','40','60','100'], respuesta_correcta:0,
+        pista:'Divide los costos fijos por el margen que deja cada unidad vendida.',
+        desarrollo:'El punto de equilibrio se alcanza cuando el margen total cubre los costos fijos: 100.000 / 2.000 = 50 unidades vendidas.',
+        dato_curioso:''
+      },
+      {
+        tema:'Costo de oportunidad', enunciado:'Si decides estudiar en vez de trabajar, dejando de ganar $500.000 al mes, ¿cómo se llama ese ingreso al que renuncias?',
+        figura_svg:'', opciones:['Costo de oportunidad','Costo hundido','Costo marginal','Costo fijo'], respuesta_correcta:0,
+        pista:'Es lo que dejas de ganar por elegir una opción en vez de otra.',
+        desarrollo:'El costo de oportunidad es el valor de la mejor alternativa a la que renuncias al tomar una decisión — en este caso, el sueldo que dejarías de percibir por estudiar en vez de trabajar.',
+        dato_curioso:''
+      },
+      {
+        tema:'Costo hundido', enunciado:'Una empresa ya gastó $10 millones en un proyecto que resultó ser malo. ¿Qué nombre recibe ese gasto ya irrecuperable, sin importar la decisión futura?',
+        figura_svg:'', opciones:['Costo hundido','Costo de oportunidad','Costo variable','Costo marginal'], respuesta_correcta:0,
+        pista:'Es un gasto que ya ocurrió y no cambia sin importar lo que decidas ahora.',
+        desarrollo:'Un costo hundido ya fue gastado y es irrecuperable; la teoría económica dice que no debería influir en decisiones futuras, aunque en la práctica mucha gente cae en el "sesgo del costo hundido".',
+        dato_curioso:''
+      },
+      {
+        tema:'Bonos vs acciones', enunciado:'Al comprar un bono corporativo, ¿qué obtiene principalmente el inversionista?',
+        figura_svg:'', opciones:['Un préstamo a la empresa, con intereses pactados','Una parte de la propiedad de la empresa','El derecho a votar en la junta de accionistas','Un descuento en los productos de la empresa'], respuesta_correcta:0,
+        pista:'A diferencia de una acción, un bono NO te hace dueño de la empresa.',
+        desarrollo:'Comprar un bono es prestarle dinero a quien lo emite (empresa o gobierno) a cambio de intereses y la devolución del capital en una fecha futura — a diferencia de una acción, no te da propiedad sobre la empresa.',
+        dato_curioso:''
+      },
+      {
+        tema:'Componentes del PIB', enunciado:'¿Cuál de estos NO es uno de los componentes principales del PIB medido por el lado del gasto?',
+        figura_svg:'', opciones:['La tasa de desempleo','El consumo de los hogares','La inversión','El gasto de gobierno'], respuesta_correcta:0,
+        pista:'Uno de estos cuatro no es un tipo de gasto, sino un indicador distinto.',
+        desarrollo:'El PIB por el lado del gasto se calcula como consumo + inversión + gasto de gobierno + exportaciones netas. La tasa de desempleo es un indicador del mercado laboral, no un componente del gasto.',
+        dato_curioso:''
+      },
+      {
+        tema:'Definición de desempleo', enunciado:'Si una persona dejó de buscar trabajo activamente y ya no está disponible para trabajar, ¿se le sigue contando como "desempleada" en las estadísticas oficiales?',
+        figura_svg:'', opciones:['No, sale de la fuerza de trabajo y no cuenta como desempleada','Sí, siempre cuenta como desempleada','Solo si tiene menos de 30 años','Depende del sueldo que tenía antes'], respuesta_correcta:0,
+        pista:'Para contar como "desempleado" hay que estar buscando trabajo activamente.',
+        desarrollo:'Las estadísticas de desempleo solo cuentan a quienes buscan trabajo activamente y están disponibles. Quien deja de buscar sale de la "fuerza de trabajo" y no aparece como desempleado, aunque no tenga empleo.',
+        dato_curioso:''
+      },
+      {
+        tema:'Plusvalía inmobiliaria', enunciado:'Un terreno se compra en $50 millones y, tres años después, se vende en $70 millones sin habérsele hecho mejoras. ¿Cómo se llama esa ganancia de $20 millones por el solo paso del tiempo y el contexto?',
+        figura_svg:'', opciones:['Plusvalía','Depreciación','Amortización','Flujo de caja'], respuesta_correcta:0,
+        pista:'Es el aumento de valor de un activo, sin que el dueño le haya hecho nada.',
+        desarrollo:'La plusvalía es el incremento de valor de un activo —como un terreno— por factores externos (ubicación, desarrollo urbano, demanda), sin que el dueño haya invertido en mejorarlo.',
+        dato_curioso:''
+      },
+      {
+        tema:'Flujo de caja', enunciado:'Una empresa tiene utilidad contable positiva, pero no tiene efectivo suficiente para pagar sus sueldos este mes. ¿Qué problema está enfrentando?',
+        figura_svg:'', opciones:['Un problema de flujo de caja','Un problema de rentabilidad','Un problema de EBITDA negativo','Un problema de tipo de cambio'], respuesta_correcta:0,
+        pista:'Utilidad "en el papel" no siempre significa tener plata disponible ahora.',
+        desarrollo:'El flujo de caja mide el efectivo real que entra y sale de la empresa; se puede ser "rentable" en el papel (por ventas a crédito, por ejemplo) y aun así no tener caja suficiente para pagar obligaciones inmediatas.',
+        dato_curioso:''
+      },
+      {
+        tema:'Amortización de un crédito', enunciado:'En un crédito hipotecario a cuota fija, con el paso de los años (y tasa fija), ¿qué pasa con la proporción de la cuota que va a intereses versus a capital?',
+        figura_svg:'', opciones:['La parte de intereses baja y la de capital sube','La parte de intereses sube y la de capital baja','Ambas se mantienen siempre iguales','Depende solo de la UF'], respuesta_correcta:0,
+        pista:'Al principio del crédito se paga proporcionalmente más interés que al final.',
+        desarrollo:'En la tabla de amortización de un crédito a cuota fija, al inicio la mayor parte de cada cuota paga intereses (porque la deuda es alta); con el tiempo, a medida que baja el saldo, una porción creciente de la cuota abona a capital.',
+        dato_curioso:''
+      },
+      {
+        tema:'Meta de inflación', enunciado:'El Banco Central de Chile tiene una meta de inflación de largo plazo. ¿Cuál es ese valor objetivo?',
+        figura_svg:'', opciones:['3% anual','0% anual','7% anual','10% anual'], respuesta_correcta:0,
+        pista:'Es un número bajo de un solo dígito, no cero.',
+        desarrollo:'El Banco Central de Chile define una meta de inflación de 3% anual (con un rango de tolerancia de +/-1 punto), y usa la TPM como principal herramienta para acercarse a esa meta.',
+        dato_curioso:'Chile fue uno de los primeros países emergentes en adoptar un esquema de "metas de inflación" explícitas, a comienzos de los años 90.'
+      },
+      {
+        tema:'Escasez y precio', enunciado:'Tras una sequía severa, la oferta de un cultivo cae fuertemente mientras la demanda se mantiene igual. ¿Qué debería pasar con su precio?',
+        figura_svg:'', opciones:['Debería subir','Debería bajar','Debería mantenerse igual','Depende solo del IVA'], respuesta_correcta:0,
+        pista:'Menos oferta, con la misma demanda, tiende a mover el precio hacia arriba.',
+        desarrollo:'Con menos unidades disponibles y la misma cantidad de compradores dispuestos a pagar, el precio de equilibrio sube hasta que la cantidad demandada se ajusta a la nueva oferta, más escasa.',
+        dato_curioso:''
+      },
+      {
+        tema:'Riesgo y retorno', enunciado:'En general, ¿qué relación existe entre el retorno esperado de una inversión y el riesgo que asume el inversionista?',
+        figura_svg:'', opciones:['A mayor riesgo, generalmente se exige un mayor retorno esperado','A mayor riesgo, el retorno esperado siempre baja','No existe relación entre riesgo y retorno','El riesgo solo afecta a las acciones, nunca a los bonos'], respuesta_correcta:0,
+        pista:'Nadie asumiría más riesgo sin esperar algo a cambio.',
+        desarrollo:'Los inversionistas exigen, en promedio, un retorno esperado mayor por asumir más riesgo — por eso activos más riesgosos suelen ofrecer, en teoría, mayores retornos esperados que activos más seguros como bonos del Estado.',
+        dato_curioso:''
+      },
+      {
+        tema:'Tasa de interés real', enunciado:'Si un depósito paga 5% de interés anual y la inflación del año fue 4%, ¿cuál es aproximadamente la tasa de interés real ganada?',
+        figura_svg:'', opciones:['Cerca de 1%','Cerca de 9%','Cerca de 5%','Cerca de 4%'], respuesta_correcta:0,
+        pista:'Tasa real ≈ tasa nominal menos inflación.',
+        desarrollo:'La tasa de interés real aproximada es la tasa nominal menos la inflación: 5% − 4% ≈ 1%. Es lo que realmente ganas en términos de poder de compra, no solo en pesos.',
+        dato_curioso:''
+      },
+      {
+        tema:'IVA en Chile', enunciado:'En Chile, ¿qué porcentaje corresponde actualmente a la tasa general del IVA (Impuesto al Valor Agregado)?',
+        figura_svg:'', opciones:['19%','12%','21%','16%'], respuesta_correcta:0,
+        pista:'Es una tasa que lleva sin cambios varios años, un poco menos de un quinto del precio.',
+        desarrollo:'La tasa general del IVA en Chile es 19%, y se aplica sobre la mayoría de las ventas de bienes y servicios, incluido en el precio final que paga el consumidor.',
+        dato_curioso:''
+      }
+    ]
+  };
+
+  // ---- State ----
+  let state = {
+    mode:null,
+    used:[],           // temas ya usados en la sesión
+    sessionCorrect:0,
+    sessionTotal:0,
+    current:null,
+    answered:false
+  };
+  let persisted = { streakDays:0, lastDate:null };
+
+  const el = (sel)=>document.querySelector(sel);
+  const homeScreen = el('#screen-home');
+  const qScreen = el('#screen-question');
+  const card = el('#card');
+  const brandDot = el('#brand-dot');
+  const btnHome = el('#btn-home');
+
+  function todayStr(){ return new Date().toISOString().slice(0,10); }
+
+  async function loadStorage(){
+    try{
+      const r = await window.storage.get('ensayo:racha', false);
+      if(r && r.value){ persisted = JSON.parse(r.value); }
+    }catch(e){ /* no previous record, fine */ }
+    updateStreakOnOpen();
+    renderStats();
+  }
+  let seenPersist = { calculo:[], historia:[], economia:[] };
+  async function loadSeenTemas(){
+    try{
+      const r = await window.storage.get('ensayo:vistos', false);
+      if(r && r.value){
+        const parsed = JSON.parse(r.value);
+        if(parsed && typeof parsed === 'object'){
+          seenPersist = Object.assign({calculo:[], historia:[], economia:[]}, parsed);
+        }
+      }
+    }catch(e){ /* sin historial previo, parte limpio */ }
+  }
+  async function saveSeenTemas(){
+    try{ await window.storage.set('ensayo:vistos', JSON.stringify(seenPersist), false); }
+    catch(e){ /* almacenamiento no disponible, seguimos igual */ }
+  }
+  function markSeen(mode, tema){
+    if(!tema) return;
+    if(!Array.isArray(seenPersist[mode])) seenPersist[mode] = [];
+    if(!seenPersist[mode].includes(tema)) seenPersist[mode].push(tema);
+    const CAP = 40;
+    if(seenPersist[mode].length > CAP){ seenPersist[mode] = seenPersist[mode].slice(-CAP); }
+    saveSeenTemas();
+  }
+  function updateStreakOnOpen(){
+    const today = todayStr();
+    if(persisted.lastDate === today){ /* ya contado hoy */ }
+    else{
+      const y = new Date(); y.setDate(y.getDate()-1);
+      const yStr = y.toISOString().slice(0,10);
+      if(persisted.lastDate === yStr){ persisted.streakDays = (persisted.streakDays||0) + 1; }
+      else{ persisted.streakDays = 1; }
+      persisted.lastDate = today;
+      saveStorage();
+    }
+  }
+  async function saveStorage(){
+    try{ await window.storage.set('ensayo:racha', JSON.stringify(persisted), false); }
+    catch(e){ /* almacenamiento no disponible, seguimos igual */ }
+  }
+  function renderStats(){
+    el('#stat-streak').textContent = persisted.streakDays || 0;
+    el('#stat-score').textContent = state.sessionCorrect + '/' + state.sessionTotal;
+  }
+
+  function setMode(mode){
+    state.mode = mode;
+    state.used = [];
+    state.sessionCorrect = 0;
+    state.sessionTotal = 0;
+    document.documentElement.style.setProperty('--accent-live', MODE_META[mode].accent);
+    brandDot.style.color = MODE_META[mode].accent;
+    homeScreen.style.display = 'none';
+    qScreen.style.display = 'block';
+    btnHome.style.display = 'inline-block';
+    renderStats();
+    nextQuestion();
+  }
+
+  function goHome(){
+    state.mode = null;
+    qScreen.style.display = 'none';
+    homeScreen.style.display = 'block';
+    btnHome.style.display = 'none';
+    brandDot.style.color = '#C98A3B';
+  }
+
+  function renderLoading(){
+    const msgs = LOADING_MSGS[state.mode];
+    const msg = msgs[Math.floor(Math.random()*msgs.length)];
+    card.innerHTML = `
+      <div class="q-meta"><span>${MODE_META[state.mode].label}</span><span class="num">preparando…</span></div>
+      <div class="loading-wrap">
+        <div class="loading-row"><div class="spinner"></div><span>${msg}</span></div>
+      </div>`;
+  }
+
+  const MODE_TOOLS = {
+    calculo: null,
+    historia: null,
+    economia: [{ type:'web_search_20250305', name:'web_search' }]
+  };
+
+  async function fetchFromAPI(){
+    const system = MODE_SYSTEM[state.mode] + '\n\n' + SCHEMA_HINT;
+    const avoidList = Array.from(new Set([...(seenPersist[state.mode]||[]), ...state.used]));
+    const avoid = avoidList.length
+      ? `Evita repetir estos temas ya usados antes: ${avoidList.join(', ')}.`
+      : 'Es la primera pregunta de la sesión.';
+    const user = `Genera una pregunta nueva ahora. ${avoid} Responde solo el JSON.`;
+
+    const tools = MODE_TOOLS[state.mode];
+    const body = {
+      model:'claude-sonnet-4-6',
+      max_tokens: tools ? 2200 : 1000,
+      system: system,
+      messages:[{role:'user', content:user}]
+    };
+    if(tools) body.tools = tools;
+
+    const resp = await fetch('/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify(body)
+    });
+    if(!resp.ok) throw new Error('API status ' + resp.status);
+    const data = await resp.json();
+    const textBlocks = (data.content||[]).filter(b=>b.type==='text');
+    const lastText = textBlocks.length ? textBlocks[textBlocks.length-1].text : '';
+    let clean = lastText.trim().replace(/^```json/i,'').replace(/^```/,'').replace(/```$/,'').trim();
+    const parsed = JSON.parse(clean);
+    if(!parsed.enunciado || !Array.isArray(parsed.opciones) || typeof parsed.respuesta_correcta !== 'number'){
+      throw new Error('Formato inesperado');
+    }
+    return parsed;
+  }
+
+  function getFallback(){
+    const bank = FALLBACK[state.mode];
+    const seen = new Set([...(seenPersist[state.mode]||[]), ...state.used]);
+    let candidates = bank.filter(q => !seen.has(q.tema));
+    if(candidates.length === 0){
+      candidates = bank.filter(q => !state.used.includes(q.tema)); // al menos evita repetir esta misma sesión
+      if(candidates.length === 0) candidates = bank;
+    }
+    return candidates[Math.floor(Math.random()*candidates.length)];
+  }
+
+  async function nextQuestion(){
+    state.answered = false;
+    renderLoading();
+    let q;
+    try{
+      q = await fetchFromAPI();
+    }catch(e1){
+      console.error('Ensayo: primer intento de API falló, reintentando…', e1);
+      try{
+        q = await fetchFromAPI();
+      }catch(e2){
+        console.error('Ensayo: segundo intento también falló, uso banco local.', e2);
+        q = getFallback();
+      }
+    }
+    state.current = q;
+    const tema = q.tema || (q.enunciado||'').slice(0,24);
+    state.used.push(tema);
+    markSeen(state.mode, tema);
+    state.sessionTotal++;
+    renderQuestion(q);
+    renderStats();
+  }
+
+  function safeSvg(svg){
+    if(!svg || typeof svg !== 'string') return '';
+    const trimmed = svg.trim();
+    if(!trimmed.startsWith('<svg')) return '';
+    if(/<script/i.test(trimmed)) return '';
+    return trimmed;
+  }
+
+  // ---- Gráfico de función (calculado en el cliente, no dibujado a mano por la API) ----
+  function evalPoly(coefs, x){
+    const deg = coefs.length - 1;
+    let r = 0;
+    for(let i=0;i<coefs.length;i++){ r += coefs[i]*Math.pow(x, deg-i); }
+    return r;
+  }
+  function derivPoly(coefs){
+    const deg = coefs.length - 1;
+    const d = [];
+    for(let i=0;i<coefs.length-1;i++){ d.push(coefs[i]*(deg-i)); }
+    return d.length ? d : [0];
+  }
+  function clampNum(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function formatNum(n){
+    if(!isFinite(n)) return '';
+    return Number.isInteger(n) ? String(n) : (Math.round(n*100)/100).toString();
+  }
+  function buildFunctionGraph(g){
+    try{
+      if(!g || typeof g !== 'object') return '';
+      if(!Array.isArray(g.coeficientes) || g.coeficientes.length===0 || g.coeficientes.length>4) return '';
+      const coefs = g.coeficientes.map(Number);
+      if(coefs.some(c=>!isFinite(c))) return '';
+
+      let xmin=-1, xmax=5;
+      if(Array.isArray(g.rango_x) && g.rango_x.length===2){
+        const a=Number(g.rango_x[0]), b=Number(g.rango_x[1]);
+        if(isFinite(a) && isFinite(b) && a<b){ xmin=a; xmax=b; }
+      }
+
+      const N=48, pts=[];
+      let ymin=Infinity, ymax=-Infinity;
+      for(let i=0;i<=N;i++){
+        const x = xmin + (xmax-xmin)*i/N;
+        const y = evalPoly(coefs,x);
+        if(!isFinite(y)) return '';
+        pts.push([x,y]);
+        if(y<ymin) ymin=y;
+        if(y>ymax) ymax=y;
+      }
+
+      const hasPoint = g.punto_x!==null && g.punto_x!==undefined && g.punto_x!=='' && isFinite(Number(g.punto_x));
+      let px=null, py=null, slope=null;
+      if(hasPoint){
+        px = Number(g.punto_x);
+        py = evalPoly(coefs, px);
+        if(isFinite(py)){
+          if(py<ymin) ymin=py;
+          if(py>ymax) ymax=py;
+          if(g.mostrar_tangente){
+            slope = evalPoly(derivPoly(coefs), px);
+            if(!isFinite(slope)) slope=null;
+          }
+        } else { px=null; py=null; }
+      }
+
+      if(ymax===ymin){ ymax+=1; ymin-=1; }
+      const yPad = (ymax-ymin)*0.15 || 1;
+      ymin -= yPad; ymax += yPad;
+
+      const W=280,H=190, ML=30,MR=14,MT=14,MB=16;
+      const plotW=W-ML-MR, plotH=H-MT-MB;
+      const xToPx = x => ML + (x-xmin)/(xmax-xmin)*plotW;
+      const yToPx = y => MT + (ymax-y)/(ymax-ymin)*plotH;
+
+      let svg = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+      svg += `<rect x="${ML}" y="${MT}" width="${plotW}" height="${plotH}" fill="none" stroke="#2B2B2E" stroke-width="1" opacity="0.15"/>`;
+      if(xmin<=0 && xmax>=0){
+        const xp = xToPx(0).toFixed(1);
+        svg += `<line x1="${xp}" y1="${MT}" x2="${xp}" y2="${H-MB}" stroke="#2B2B2E" stroke-width="1" opacity="0.4"/>`;
+      }
+      if(ymin<=0 && ymax>=0){
+        const yp = yToPx(0).toFixed(1);
+        svg += `<line x1="${ML}" y1="${yp}" x2="${W-MR}" y2="${yp}" stroke="#2B2B2E" stroke-width="1" opacity="0.4"/>`;
+      }
+      const path = pts.map((p,i)=> (i===0?'M':'L') + xToPx(p[0]).toFixed(1) + ' ' + yToPx(p[1]).toFixed(1)).join(' ');
+      svg += `<path d="${path}" fill="none" stroke="#2B2B2E" stroke-width="1.8"/>`;
+      if(hasPoint && slope!==null){
+        const y1t = py + slope*(xmin-px), y2t = py + slope*(xmax-px);
+        svg += `<line x1="${xToPx(xmin).toFixed(1)}" y1="${yToPx(clampNum(y1t,ymin,ymax)).toFixed(1)}" x2="${xToPx(xmax).toFixed(1)}" y2="${yToPx(clampNum(y2t,ymin,ymax)).toFixed(1)}" stroke="#3E7CB8" stroke-width="1.6" stroke-dasharray="5 3"/>`;
+      }
+      if(hasPoint && px!==null){
+        svg += `<circle cx="${xToPx(px).toFixed(1)}" cy="${yToPx(py).toFixed(1)}" r="4" fill="#C1443B"/>`;
+        svg += `<text x="${(xToPx(px)+7).toFixed(1)}" y="${(yToPx(py)-7).toFixed(1)}" font-size="11" fill="#2B2B2E">x=${formatNum(px)}</text>`;
+      }
+      svg += `</svg>`;
+      return svg;
+    }catch(e){ return ''; }
+  }
+
+  function letterFor(i){ return String.fromCharCode(65+i); }
+
+  function renderQuestion(q){
+    const letters = q.opciones.map((_,i)=>letterFor(i));
+    const figure = safeSvg(q.figura_svg) || buildFunctionGraph(q.grafica_datos);
+    card.innerHTML = `
+      <div class="q-meta"><span>${MODE_META[state.mode].label}</span><span class="num">pregunta ${state.sessionTotal}</span></div>
+      <p class="q-enunciado">${escapeHtml(q.enunciado)}</p>
+      ${figure ? `<div class="q-figure">${figure}</div>` : ''}
+      <ul class="q-options" id="opts">
+        ${q.opciones.map((op,i)=>`
+          <li class="q-option" data-idx="${i}">
+            <span class="bubble"><span class="fill"></span></span>
+            <span class="q-option-text"><b style="font-family:var(--font-mono);opacity:.55;margin-right:4px;">${letters[i]}</b>${escapeHtml(op)}</span>
+          </li>`).join('')}
+      </ul>
+      <div class="actions">
+        <button class="btn" id="btn-submit" disabled>Marcar respuesta</button>
+        ${q.pista ? `<button class="btn ghost" id="btn-hint" type="button">💡 Pista</button>` : ''}
+        <span class="feedback-line" id="feedback"></span>
+      </div>
+      ${q.pista ? `<div class="hint-box" id="hint-box" hidden>${escapeHtml(q.pista)}</div>` : ''}
+      <div class="reveal" id="reveal">
+        <div class="reveal-block">
+          <h4>Desarrollo</h4>
+          <p>${escapeHtml(q.desarrollo||'')}</p>
+          ${q.dato_curioso ? `<div class="funfact">${escapeHtml(q.dato_curioso)}</div>` : ''}
+        </div>
+        <div class="next-row">
+          <button class="btn" id="btn-next">Siguiente pregunta →</button>
+        </div>
+      </div>
+    `;
+
+    let selected = null;
+    const hintBtn = document.getElementById('btn-hint');
+    if(hintBtn){
+      hintBtn.addEventListener('click', ()=>{
+        const box = document.getElementById('hint-box');
+        const hidden = box.hasAttribute('hidden');
+        if(hidden){ box.removeAttribute('hidden'); hintBtn.textContent = '💡 Ocultar pista'; }
+        else{ box.setAttribute('hidden',''); hintBtn.textContent = '💡 Pista'; }
+      });
+    }
+    const opts = card.querySelectorAll('.q-option');
+    opts.forEach(opt=>{
+      opt.addEventListener('click', ()=>{
+        if(state.answered) return;
+        opts.forEach(o=>o.classList.remove('selected'));
+        opt.classList.add('selected');
+        selected = parseInt(opt.dataset.idx,10);
+        el('#btn-submit').disabled = false;
+      });
+    });
+
+    el('#btn-submit').addEventListener('click', ()=>{
+      if(selected===null || state.answered) return;
+      state.answered = true;
+      const correctIdx = q.respuesta_correcta;
+      const isCorrect = selected === correctIdx;
+      if(isCorrect) state.sessionCorrect++;
+      renderStats();
+      opts.forEach(o=>o.classList.add('locked'));
+
+      opts.forEach(o=>{
+        const idx = parseInt(o.dataset.idx,10);
+        if(idx===correctIdx){
+          o.classList.add('correct-answer');
+          addMark(o, true);
+        } else if(idx===selected){
+          o.classList.add('wrong-answer');
+          addMark(o, false);
+        }
+      });
+
+      const fb = el('#feedback');
+      fb.textContent = isCorrect ? '¡Correcto!' : 'Incorrecto — revisa el desarrollo';
+      fb.className = 'feedback-line ' + (isCorrect ? 'ok' : 'bad');
+      el('#btn-submit').disabled = true;
+
+      el('#reveal').classList.add('open');
+      saveStorage();
+    });
+
+    el('#btn-next').addEventListener('click', nextQuestion);
+  }
+
+  function addMark(optionEl, ok){
+    const bubble = optionEl.querySelector('.bubble');
+    const ns = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(ns,'svg');
+    svg.setAttribute('viewBox','0 0 40 40');
+    svg.setAttribute('width','40'); svg.setAttribute('height','40');
+    svg.classList.add('mark-icon');
+    const path = document.createElementNS(ns,'path');
+    path.setAttribute('stroke', ok ? 'var(--correct)' : 'var(--incorrect)');
+    path.setAttribute('d', ok ? 'M10 21 L17 28 L31 12' : 'M12 12 L28 28 M28 12 L12 28');
+    svg.appendChild(path);
+    bubble.appendChild(svg);
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str==null ? '' : String(str);
+    return d.innerHTML;
+  }
+
+  // ---- wire up ----
+  document.querySelectorAll('.mode-card').forEach(c=>{
+    c.addEventListener('click', ()=>setMode(c.dataset.mode));
+  });
+  btnHome.addEventListener('click', goHome);
+
+  loadStorage();
+  loadSeenTemas();
+})();
+</script>
+</body>
+</html>
